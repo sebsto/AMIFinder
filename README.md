@@ -57,3 +57,8 @@ script to respond to ```create```, ```update``` and ```delete``` requests.
 
 ```update``` and ```delete``` shell scripts are empty.  Only ```create``` is implemented.  It uses ```findAMI``` to
 retrieve the correct AMI IDs.
+
+TODO
+----
+
+- better packaging / installation procedure for findAMI.py
