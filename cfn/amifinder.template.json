@@ -215,7 +215,18 @@
                                 "source" : "https://raw.githubusercontent.com/sebsto/AMIFinder/master/sh/delete.sh",
                                 "mode" : "000755",
                                 "owner" : "ec2-user"
-                            }
+                            },
+                            "/home/ec2-user/ec2tools/amifinder.py" : {
+                                "source" : "https://raw.githubusercontent.com/sebsto/AMIFinder/master/ec2tools/amifinder.py",
+                                "mode" : "000755",
+                                "owner" : "ec2-user"
+                            },
+                            "/home/ec2-user/findAMI.py" : {
+                                "source" : "https://raw.githubusercontent.com/sebsto/AMIFinder/master/findAMI.py",
+                                "mode" : "000755",
+                                "owner" : "ec2-user"
+                            },
+
                         },
                         "sources" : {
                             "/home/ec2-user" : "https://raw.githubusercontent.com/sebsto/AMIFinder/master/sh/aws-cfn-resource-bridge-0.1.tar.gz"
