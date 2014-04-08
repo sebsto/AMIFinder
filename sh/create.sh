@@ -18,7 +18,7 @@ AMI=$(/home/ec2-user/AMIFinder/findAMI.py -a ${Event_ResourceProperties_Version}
 AMI_ret=$?
 if [ $AMI_ret -ne 0 ]
 then
-    error_exit "Find AMI failed." $mount_ret
+    error_exit "Find AMI failed." $AMI_ret
 else
     echo "{ \"PhysicalResourceId\" : \"$AMI\" }" >&3 3>&-  # echo success to stdout (instead of log) and then close fd 3
     exit 0
