@@ -161,22 +161,6 @@
                 ]
             }
         },
-        "Instance" : {
-            "Type" : "AWS::EC2::Instance",
-            "Properties" : {
-                "IamInstanceProfile" : { "Ref" : "CFNCustomResourceInstanceProfile" },
-                "ImageId" : { "Fn::FindInMap" : ["AWSRegionToAMI", { "Ref" : "AWS::Region" }, "AMI"] },
-                "InstanceType" : { "Ref" : "InstanceType" },
-                "KeyName" : { "Ref" : "KeyName" },
-                "SecurityGroups" : [ { "Ref" : "SecurityGroup" } ],
-                "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
-                    "#!/bin/bash -x\n",
-                    "exec &> /home/ec2-user/userdata.log\n",
-                    "/opt/aws/bin/cfn-init --region ", { "Ref" : "AWS::Region" }, " -s ", { "Ref" : "AWS::StackId" }, " -r Instance -v\n",
-                    "/opt/aws/bin/cfn-signal -e $? ", { "Fn::Base64" : { "Ref" : "WaitConditionHandle" }}, "\n"
-                ]] } }
-            }
-        },
 
         "SecurityGroup" : {
             "Type" : "AWS::EC2::SecurityGroup",
@@ -192,6 +176,66 @@
                 ]
             }
         },
+
+        "Instance" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "IamInstanceProfile" : { "Ref" : "CFNCustomResourceInstanceProfile" },
+                "ImageId" : { "Fn::FindInMap" : ["AWSRegionToAMI", { "Ref" : "AWS::Region" }, "AMI"] },
+                "InstanceType" : { "Ref" : "InstanceType" },
+                "KeyName" : { "Ref" : "KeyName" },
+                "SecurityGroups" : [ { "Ref" : "SecurityGroup" } ],
+                "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
+                    "#!/bin/bash -x\n",
+                    "exec &> /home/ec2-user/userdata.log\n",
+                    "/opt/aws/bin/cfn-init --region ", { "Ref" : "AWS::Region" }, " -s ", { "Ref" : "AWS::StackId" }, " -r Instance -v\n",
+                    "/opt/aws/bin/cfn-signal -e $? ", { "Fn::Base64" : { "Ref" : "WaitConditionHandle" }}, "\n"
+                ]] } }
+
+            },
+            "Metadata" : {
+                "AWS::CloudFormation::Init" : {
+                    "config" : {
+                        "files" : {
+                            "/home/ec2-user/cfn-resource-bridge.conf" : {
+                                "source" : "https://raw.githubusercontent.com/sebsto/AMIFinder/master/sh/cfn-resource-bridge.conf",
+                                "context" : { "queue_url" : { "Ref": "CFNCustomResourceAMIFinderQueue" } }
+                            },
+                            "/home/ec2-user/create.sh" : {
+                                "source" : "https://raw.githubusercontent.com/sebsto/AMIFinder/master/sh/create.sh",
+                                "mode" : "000755",
+                                "owner" : "ec2-user"
+                            },
+                            "/home/ec2-user/update.sh" : {
+                                "source" : "https://raw.githubusercontent.com/sebsto/AMIFinder/master/sh/update.sh",
+                                "mode" : "000755",
+                                "owner" : "ec2-user"
+                            },
+                            "/home/ec2-user/delete.sh" : {
+                                "source" : "https://raw.githubusercontent.com/sebsto/AMIFinder/master/sh/delete.sh",
+                                "mode" : "000755",
+                                "owner" : "ec2-user"
+                            }
+                        },
+                        "sources" : {
+                            "/home/ec2-user" : "https://raw.githubusercontent.com/sebsto/AMIFinder/master/sh/aws-cfn-resource-bridge-0.1.tar.gz"
+                        },
+                        "commands" : {
+                            "00_install_cfn_resource_bridge" : {
+                                "command" : "cd aws-cfn-resource-bridge-0.1 ; python setup.py install ; cd ..",
+                                "cwd" : "/home/ec2-user"
+                            },
+                            "10_run_cfn_resource_bridge" : {
+                                "command" : "cfn-resource-bridge -v -c /home/ec2-user",
+                                "cwd" : "/home/ec2-user"
+                            }
+
+                        }
+                    }
+                }
+            }
+        },
+
 
         "WaitConditionHandle" : {
             "Type" : "AWS::CloudFormation::WaitConditionHandle"
