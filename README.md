@@ -1,7 +1,7 @@
 AMIFinder
 =========
 
-AMIFinder is a sample CloudFormation Custom Resource environment.
+AMIFinder is a sample [CloudFormation Custom Resource] (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/crpg-walkthrough.html) environment.
 
 This Custom Resource uses EC2's DescribeImage API to find an Amazon Windows Base image (64 bits, ebs based)
  of the specified version.
@@ -59,7 +59,7 @@ The ```amifinder.template.json``` CFN template creates the following environment
 - a SQS Policy allowing SNS to post messages to the queue
 - an IAM Role to allow an EC2 instance to read from the queue and to call DescribeImage EC2 API
 - a Security Group allowing inbound SSH connections
-- an Instance bootstrapped with ```cfn-resource-bridge```[https://github.com/aws/aws-cfn-resource-bridge] and
+- an Instance bootstrapped with [```cfn-resource-bridge```](https://github.com/aws/aws-cfn-resource-bridge) and
 ```findAMI```, a custom python helper script
 
 ```cfn-resource-bridge``` will poll the queue, waiting for CloudFormation messages, and will call appropriate shell
