@@ -69,4 +69,4 @@ In this example, ```update``` and ```delete``` shell scripts are empty.  Only ``
 TODO
 ----
 
-- better packaging / installation procedure for findAMI.py
+- improve based on collected feedback
