@@ -3,7 +3,7 @@ __author__ = 'stormacq'
 import unittest
 import logging
 
-from ec2tools.amifinder import AMIFinder
+from findAMI import AMIFinder
 
 
 class AMIFinderTest(unittest.TestCase):
