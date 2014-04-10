@@ -17,7 +17,7 @@ The ```cfn``` directory contains two CloudFormation templates:
 - ```amifinder.template.json``` setup the complete infrastructure to implement the Custom Resource "AMIFinder".  See
 below for a list of resources it creates.
 
-- ```amifinder_test.template.json``` is a sample template that shows how to use the Custom Resource :
+- ```amifinder_sample.template.json``` is a sample template that shows how to use the Custom Resource :
 
 ```
 {
