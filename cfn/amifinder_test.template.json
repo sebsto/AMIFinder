@@ -1,0 +1,20 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Call AMIFinder Custom Resource and give AMI id as output",
+
+    "Resources": {
+        "AMIFinder": {
+            "Type": "Custom::AMIFinder",
+            "Version": "1.0",
+            "Properties": {
+                "ServiceToken": "{{topic_arn}}",
+                "Version": "2012"
+            }
+        }
+    },
+    "Outputs" : {
+        "WindowsAMIID" : {
+            "Value" : { "Ref" : "AMIFinder" }
+        }
+    }
+}

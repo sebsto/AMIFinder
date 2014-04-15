@@ -22,7 +22,7 @@
             "Type": "Custom::AMIFinder",
             "Version": "1.0",
             "Properties": {
-                "ServiceToken": "<insert ARN of Topic created for AMIFinder Custom Resource>",
+                "ServiceToken": "arn:aws:sns:eu-west-1:577031028568:TestCR-CFNCustomResourceAMIFinderTopic-1J5KTFPC09YMX",
                 "Version": "2012"
             }
         },
