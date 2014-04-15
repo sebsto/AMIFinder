@@ -5,9 +5,6 @@ import datetime, time
 import pystache
 import boto.cloudformation
 
-from findAMI import AMIFinder
-
-
 class AMIFinderTest(unittest.TestCase):
 
     @classmethod
@@ -46,6 +43,7 @@ class AMIFinderTest(unittest.TestCase):
     def doTest(self, region):
         # create custom resource stack
         stack = self.createCustomResource(region)
+        self.assertEqual(len(stack.outputs), 1, "Test Stack outputs len is not 1")
 
         # retrieve topic ARN in output
         with open ("cfn/amifinder_test.template.json", "r") as cfnTemplateFile:
@@ -58,7 +56,7 @@ class AMIFinderTest(unittest.TestCase):
         now = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
         stackID = conn.create_stack(stack_name='TestAMIFinderCustomResource-' + now, template_body=testTemplate)
         stackTest = conn.describe_stacks(stackID)[0]
-        print vars(stackTest)
+        #print vars(stackTest)
         self.logger.debug('Waiting for Test Stack to be created')
         while stackTest.stack_status == 'CREATE_IN_PROGRESS':
             self.logger.debug('.')
@@ -67,15 +65,54 @@ class AMIFinderTest(unittest.TestCase):
         self.logger.debug('Test Stack created, status = %s' % stackTest.stack_status)
 
         # delete custom resource stack
-        self.deleteStack(region, stack.stack_id)
         self.deleteStack(region, stackTest.stack_id)
+        time.sleep(10)
+        self.deleteStack(region, stack.stack_id)
 
         return stackTest
 
     def test_eu_west_1(self):
         region = 'eu-west-1'
         stack = self.doTest(region)
-        self.assertEqual(len(stack.outputs), 1, "Test Stack outputs len is not 1")
+        self.assertFindAMI(stack)
+
+    def test_us_east_1(self):
+        region = 'us-east-1'
+        stack = self.doTest(region)
+        self.assertFindAMI(stack)
+
+    def test_us_west_1(self):
+        region = 'us-west-1'
+        stack = self.doTest(region)
+        self.assertFindAMI(stack)
+
+    def test_us_west_2(self):
+        region = 'us-west-2'
+        stack = self.doTest(region)
+        self.assertFindAMI(stack)
+
+    def test_sa_east_1(self):
+        region = 'sa-east-1'
+        stack = self.doTest(region)
+        self.assertFindAMI(stack)
+
+    def test_ap_southeast_1(self):
+        region = 'ap-southeast-1'
+        stack = self.doTest(region)
+        self.assertFindAMI(stack)
+
+    def test_ap_southeast_2(self):
+        region = 'ap-southeast-2'
+        stack = self.doTest(region)
+        self.assertFindAMI(stack)
+
+    def test_ap_northeast_1(self):
+        region = 'ap-northeast-1'
+        stack = self.doTest(region)
+        self.assertFindAMI(stack)
+
+    def assertFindAMI(self, stack):
+        #improve test by hardcoding expected AMI ID ??
         self.assertRegexpMatches( stack.outputs[0].value, '^ami-.*$',"Test Stack does not return an AMI id")
 
 if __name__ == '__main__':
