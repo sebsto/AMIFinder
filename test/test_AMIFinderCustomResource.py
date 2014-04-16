@@ -41,33 +41,44 @@ class AMIFinderTest(unittest.TestCase):
         conn.delete_stack(stackID)
 
     def doTest(self, region):
-        # create custom resource stack
-        stack = self.createCustomResource(region)
-        self.assertEqual(len(stack.outputs), 1, "Test Stack outputs len is not 1")
+        stack     = None
+        stackTest = None
 
-        # retrieve topic ARN in output
-        with open ("cfn/amifinder_test.template.json", "r") as cfnTemplateFile:
-            testTemplateRaw=cfnTemplateFile.read()
-        topicARN = {'topic_arn' :  stack.outputs[0].value }
-        testTemplate = pystache.render(testTemplateRaw, topicARN)
+        try:
+            # create custom resource stack
+            stack = self.createCustomResource(region)
 
-        # launch sample template stack
-        conn = boto.cloudformation.connect_to_region(region)
-        now = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
-        stackID = conn.create_stack(stack_name='TestAMIFinderCustomResource-' + now, template_body=testTemplate)
-        stackTest = conn.describe_stacks(stackID)[0]
-        #print vars(stackTest)
-        self.logger.debug('Waiting for Test Stack to be created')
-        while stackTest.stack_status == 'CREATE_IN_PROGRESS':
-            self.logger.debug('.')
-            time.sleep(10)
+            # retrieve topic ARN in output
+            with open ("cfn/amifinder_test.template.json", "r") as cfnTemplateFile:
+                testTemplateRaw=cfnTemplateFile.read()
+            topicARN = {'topic_arn' :  stack.outputs[0].value }
+            testTemplate = pystache.render(testTemplateRaw, topicARN)
+
+            # launch sample template stack
+            conn = boto.cloudformation.connect_to_region(region)
+            now = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
+            stackID = conn.create_stack(stack_name='TestAMIFinderCustomResource-' + now, template_body=testTemplate)
             stackTest = conn.describe_stacks(stackID)[0]
-        self.logger.debug('Test Stack created, status = %s' % stackTest.stack_status)
+            #print vars(stackTest)
+            self.logger.debug('Waiting for Test Stack to be created')
+            while stackTest.stack_status == 'CREATE_IN_PROGRESS':
+                self.logger.debug('.')
+                time.sleep(10)
+                stackTest = conn.describe_stacks(stackID)[0]
+            self.logger.debug('Test Stack created, status = %s' % stackTest.stack_status)
 
-        # delete custom resource stack
-        self.deleteStack(region, stackTest.stack_id)
-        time.sleep(10)
-        self.deleteStack(region, stack.stack_id)
+        except:
+            import sys
+            e = sys.exc_info()[0]
+            self.logger.error('Exception while creating CFN Stacks : %s' % e)
+
+        finally:
+            # delete custom resource stack
+            if stackTest is not None:
+                self.deleteStack(region, stackTest.stack_id)
+                time.sleep(10)
+            if stack is not None:
+                self.deleteStack(region, stack.stack_id)
 
         return stackTest
 
@@ -113,6 +124,7 @@ class AMIFinderTest(unittest.TestCase):
 
     def assertFindAMI(self, stack):
         #improve test by hardcoding expected AMI ID ??
+        self.assertEqual(len(stack.outputs), 1, "Test Stack outputs len is not 1")
         self.assertRegexpMatches( stack.outputs[0].value, '^ami-.*$',"Test Stack does not return an AMI id")
 
 if __name__ == '__main__':
