@@ -56,7 +56,7 @@ class AMIFinder:
         return result
 
 
-    def findWindowsAMIInRegion(self, region, searchCriteria, locale='en'):
+    def findWindowsAMIInRegion(self, region, version, locale='en'):
         '''
             Search for a Amazon's Base AMI Windows, 64 bits, EBS based in the specific region,
             the specific searchCriteria and the specific locale
@@ -87,21 +87,43 @@ class AMIFinder:
                 self.logger.warning('No image retrieved for region "%s" using default filters (Windows, 64 Bits, EBS)' % region)
                 return None
 
-        result = None
+        results = []
         for image in self.amiList:
             #print image.description
-            if self.searchDescription(image, searchCriteria, l) is not None:
+            if self.searchDescription(image, version, l) is not None:
                 #print vars(image)
-                result = image
+                self.logger.debug('Found one matching AMI (%s) : %s' % (image.id, image.name))
+                results.append(image)
 
-        if result is not None:
-            self.logger.debug('ImageID: %s ImageDescription: %s', result.id, result.description)
+        result = None
+
+        if len(results) > 1:
+            # we have more than one result, we need to choose one
+            # lets use the date at the end of the 'name' attribute
+            versions = []
+            for img in results:
+                i = img.name.rfind('-')
+                v = img.name[i+1:].replace('.','')
+                versions.append(v)
+                #self.logger.debug('Extracted version : %s' % v)
+
+            self.logger.debug('Max version is %s' % max(versions))
+            result = results[versions.index(max(versions))]
+            self.logger.debug('\nImageID         : %s \nImageDescription: %s \nName            : %s', result.id,
+                              result.description,
+                              result.name)
+        elif len(results) == 1:
+            result = results[0]
         else:
             self.logger.debug('ImageID: none')
 
         return result
 
 def main(finder, **kwargs):
+
+    finder.logger.debug('Parameter version = %s' % kwargs['amiversion'])
+    finder.logger.debug('Parameter locale  = %s' % kwargs['locale'])
+    finder.logger.debug('Parameter region  = %s' % kwargs['region'])
 
     region = kwargs['region']
     if region is None:
@@ -129,7 +151,7 @@ if __name__ == '__main__':
 
     logging.basicConfig()
     logger = logging.getLogger('findAMI')
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     finder = AMIFinder(logger)
 
     if sys.version_info < (2, 7):
@@ -141,8 +163,9 @@ if __name__ == '__main__':
         parser = argparse.ArgumentParser(description='Find an Amazon Windows Base AMI', version='%(prog)s v' +
                                                                                             str(__version__))
     parser.add_argument('-r', '--region', type=str, help='Region name (default to local region when run on EC2)')
-    parser.add_argument('-a', '--amiversion', type=str, help='String to search in version name (for example "2008" or '
+    parser.add_argument("-a", "--amiversion", type=str, help='String to search in version name (for example "2008" or '
                                                           '"2012 SP1")', required=True)
+
     parser.add_argument('-l', '--locale', type=str, default='en', help='Two letters locale name')
     args = parser.parse_args()
     main(finder, **vars(args))
