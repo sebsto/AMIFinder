@@ -5,7 +5,7 @@ import datetime, time
 import pystache
 import boto.cloudformation
 
-class AMIFinderTest(unittest.TestCase):
+class AMIFinderCustomResourceTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -128,4 +128,5 @@ class AMIFinderTest(unittest.TestCase):
         self.assertRegexpMatches( stack.outputs[0].value, '^ami-.*$',"Test Stack does not return an AMI id")
 
 if __name__ == '__main__':
+    #todo migrate to nose or equivalent to run these tests in parallel
     unittest.main()
