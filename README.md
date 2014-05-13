@@ -12,10 +12,12 @@ Use this Custom Resource to avoid hard coding AMI ids inside your CFN templates,
 Usage
 -----
 
-The ```cfn``` directory contains two CloudFormation templates:
+The ```cfn``` directory contains three CloudFormation templates:
 
 - ```amifinder.template.json``` setup the complete infrastructure to implement the Custom Resource "AMIFinder".  See
 below for a list of resources it creates.
+
+- ```amifinder_test.template.json``` is used for unit testing.
 
 - ```amifinder_sample.template.json``` is a sample template that shows how to use the Custom Resource :
 
@@ -50,10 +52,10 @@ This template can not run "as is", you need to insert your Custom Resource's imp
 How does it work ?
 ------------------
 
-The ```amifinder.template.json``` CFN template creates the following environment :
+The ```amifinder.template.json``` CFN template creates the environment to implement the custom resource :
 
-- a SNS Topic - to be used by CFN to call the Custom Resource and to be inserted in the ```amifinder_test.template
-.json```
+- a SNS Topic - to be used by CFN to call the Custom Resource.  The SNS Topic ARN must be inserted in the
+```amifinder_test.template.json``` and your others CFN templates using this Custom resource
 - a SQS Queue subscribed to the topic
 - a SQS Policy allowing SNS to post messages to the queue
 - an IAM Role to allow an EC2 instance to read from the queue and to call DescribeImage EC2 API
