@@ -55,7 +55,7 @@ How does it work ?
 The ```amifinder.template.json``` CFN template creates the environment to implement the custom resource :
 
 - a SNS Topic - to be used by CFN to call the Custom Resource.  The SNS Topic ARN must be inserted in the
-```amifinder_test.template.json``` and your others CFN templates using this Custom resource
+```amifinder_test.template.json``` and your other CFN templates using this Custom resource
 - a SQS Queue subscribed to the topic
 - a SQS Policy allowing SNS to post messages to the queue
 - an IAM Role to allow an EC2 instance to read from the queue and to call DescribeImage EC2 API
